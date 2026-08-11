@@ -351,8 +351,27 @@ document.getElementById('pwInput').addEventListener('keydown', e => {
 const input = document.getElementById('userInput');
 const msgs = document.getElementById('messages');
 
+let isComposingInput = false;
+let justFinishedComposing = false;
+input.addEventListener('compositionstart', () => { isComposingInput = true; });
+input.addEventListener('compositionend', () => {
+  isComposingInput = false;
+  // Some browsers fire compositionend just before the keydown for the very
+  // same Enter press that confirmed the conversion, so isComposing is
+  // already false by the time keydown runs. Suppress that one Enter too,
+  // then clear the flag on the next tick so later, separate Enter presses
+  // still send normally.
+  justFinishedComposing = true;
+  setTimeout(() => { justFinishedComposing = false; }, 0);
+});
+
 input.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  if (e.key !== 'Enter' || e.shiftKey) return;
+  if (e.isComposing || isComposingInput || e.keyCode === 229 || justFinishedComposing) {
+    return; // this Enter confirmed an IME conversion, don't send
+  }
+  e.preventDefault();
+  sendMessage();
 });
 input.addEventListener('input', () => {
   input.style.height = 'auto';
@@ -401,50 +420,6 @@ function removeTyping() { const t = document.getElementById('typing'); if (t) t.
 
 
 
-const READING_DICT = {
-  "扁平足": "へんぺいそく",
-  "片足立ち": "かたあしたち",
-  "内股歩き": "うちまたあるき",
-  "土踏まず": "つちふまず",
-  "原始反射・感覚統合": "げんしはんしゃ・かんかくとうごう",
-  "原始反射": "げんしはんしゃ",
-  "感覚統合": "かんかくとうごう",
-  "走り方": "はしりかた",
-  "足指": "あしゆび",
-  "足音": "あしおと",
-  "残存": "ざんぞん",
-  "体幹": "たいかん",
-  "お腹": "おなか",
-  "筋力": "きんりょく",
-  "段差": "だんさ",
-  "苦手": "にがて",
-  "不十分": "ふじゅうぶん",
-  "主な": "おもな",
-  "転ぶ": "ころぶ",
-  "目・耳・体": "め・みみ・からだ",
-  "シーバー病": "シーバーびょう",
-  "セーバー病": "シーバーびょう",
-  "整形外科": "せいけいげか",
-  "腫れている": "はれている",
-  "足元": "あしもと",
-  "0脚": "おうきゃく",
-  "O脚": "おうきゃく",
-  "Ｏ脚": "おうきゃく",
-  "X脚": "えっくすきゃく",
-  "Ｘ脚": "えっくすきゃく",
-  "余計": "よけい",
-  "膝": "ひざ",
-  "脊髄ガラント反射": "せきずいがらんとはんしゃ",
-  "夜尿症": "やにょうしょう",
-  "膀胱": "ぼうこう",
-  "排尿": "はいにょう",
-  "夜間": "やかん",
-  "布団": "ふとん",
-  "要因": "よういん",
-  "内股": "うちまた",
-  "足": "あし"
-};
-
 function applyReadingDict(text) {
   let result = text;
 
@@ -474,12 +449,6 @@ function applyReadingDict(text) {
   // 「〜」「～」を「から」に変換（例: 5〜7人 → 5から7人）
   result = result.replace(/[〜～]/g, 'から');
 
-  // 読み方辞書を適用
-  const keys = Object.keys(READING_DICT).sort((a, b) => b.length - a.length);
-  for (const key of keys) {
-    result = result.split(key).join(READING_DICT[key]);
-  }
-
   return result;
 }
 
@@ -502,7 +471,7 @@ async function speakText(btn) {
   try {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-App-Password': PASSWORD },
       body: JSON.stringify({
         type: 'tts',
         text: applyReadingDict(text),
@@ -603,7 +572,7 @@ async function sendMessage() {
   try {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-App-Password': PASSWORD },
       body: JSON.stringify({
         system: SYSTEM_PROMPT,
         messages: history
