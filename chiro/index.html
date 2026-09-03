@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>KIZUカイロAI</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>
+:root{
+  --green:#6bbb6e; --green-d:#4e9c51;
+  --ink:#12140f; --ink2:#4b4f47; --muted:#8b8f86;
+  --line:#e3e5df; --bg:#f7f8f5; --card:#fff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Noto Sans JP",sans-serif;
+  font-size:16px;line-height:1.7;-webkit-text-size-adjust:100%}
+.logo{height:26px;width:auto;display:block}
+
+/* ---------- ログイン ---------- */
+#login{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 18px}
+.lbox{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);
+  border-radius:18px;padding:28px 24px 24px;box-shadow:0 2px 20px rgba(0,0,0,.05)}
+.lbox .logo{margin:0 auto 18px}
+.lbox h1{font-size:19px;margin:0 0 6px;text-align:center;letter-spacing:.01em}
+.lbox .sub{font-size:13.5px;color:var(--ink2);text-align:center;margin:0 0 20px;line-height:1.65}
+label{display:block;font-size:13px;font-weight:700;margin:0 0 6px;color:var(--ink2)}
+input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:11px;
+  font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+input:focus{outline:none;border-color:var(--green)}
+.field{margin-bottom:15px}
+.hint{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.55}
+button{width:100%;padding:14px;border:0;border-radius:11px;background:var(--green);color:#fff;
+  font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;transition:background .15s}
+button:hover:not(:disabled){background:var(--green-d)}
+button:disabled{opacity:.5;cursor:default}
+.linkbtn{background:none;color:var(--ink2);font-size:13.5px;font-weight:500;padding:11px;
+  text-decoration:underline;width:auto;margin:0 auto;display:block}
+.linkbtn:hover:not(:disabled){background:none;color:var(--ink)}
+.err{color:#c0392b;font-size:13.5px;margin-top:12px;line-height:1.6;min-height:1px}
+.ok{color:var(--green-d);font-size:13.5px;margin-top:12px;line-height:1.6}
+#codeStep{display:none}
+.codeinput{text-align:center;letter-spacing:.42em;font-size:26px;font-weight:700;padding:15px 10px}
+
+/* ---------- チャット ---------- */
+#app{display:none;flex-direction:column;height:100dvh}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:11px 15px;background:var(--card);border-bottom:1px solid var(--line);flex-shrink:0}
+header .logo{height:22px}
+.logout{width:auto;padding:7px 13px;font-size:12.5px;background:none;color:var(--ink2);
+  border:1px solid var(--line);border-radius:9px;font-weight:500}
+.logout:hover{background:#f0f1ed;color:var(--ink)}
+#msgs{flex:1;overflow-y:auto;padding:18px 15px 8px;-webkit-overflow-scrolling:touch}
+.wrap{max-width:720px;margin:0 auto}
+.msg{margin-bottom:16px;display:flex}
+.msg.u{justify-content:flex-end}
+.bub{max-width:86%;padding:12px 15px;border-radius:16px;font-size:15.5px;line-height:1.75;
+  word-break:break-word;overflow-wrap:anywhere}
+.msg.u .bub{background:var(--green);color:#fff;border-bottom-right-radius:5px}
+.msg.a .bub{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px}
+.bub b,.bub strong{font-weight:700}
+.bub ul{margin:8px 0;padding-left:20px}
+.bub li{margin:3px 0}
+.bub table{border-collapse:collapse;margin:9px 0;font-size:14px;width:100%}
+.bub th,.bub td{border:1px solid var(--line);padding:6px 9px;text-align:left}
+.bub th{background:#f2f4ef;font-weight:700}
+.tel{display:inline-block;background:#fff2f1;border:1px solid #f0c8c4;color:#b02c2c;
+  padding:2px 8px;border-radius:7px;font-weight:700;text-decoration:none}
+.intro{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:17px 18px;margin-bottom:18px;font-size:14.5px;line-height:1.8}
+.intro h2{font-size:16px;margin:0 0 8px}
+.intro .warn{margin-top:12px;padding:11px 13px;background:#fdf5f4;border:1.5px solid #e8b4ae;
+  border-radius:11px;font-size:13.5px;line-height:1.7}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.chip{background:#f0f4ee;border:1px solid var(--line);border-radius:16px;padding:7px 13px;
+  font-size:13px;cursor:pointer;width:auto;color:var(--ink2);font-weight:500}
+.chip:hover{background:#e6ece3;color:var(--ink)}
+.dots{display:flex;gap:5px;padding:5px 2px}
+.dots i{width:7px;height:7px;border-radius:50%;background:#c3c7bd;animation:b 1.3s infinite}
+.dots i:nth-child(2){animation-delay:.16s}.dots i:nth-child(3){animation-delay:.32s}
+@keyframes b{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+footer{padding:11px 15px calc(11px + env(safe-area-inset-bottom));background:var(--card);
+  border-top:1px solid var(--line);flex-shrink:0}
+.inrow{max-width:720px;margin:0 auto;display:flex;gap:9px;align-items:flex-end}
+#input{flex:1;resize:none;max-height:132px;padding:12px 14px;border:1.5px solid var(--line);
+  border-radius:13px;font-size:16px;font-family:inherit;line-height:1.6}
+#input:focus{outline:none;border-color:var(--green)}
+#send{width:48px;height:46px;flex-shrink:0;border-radius:13px;font-size:19px;padding:0}
+.disc{max-width:720px;margin:8px auto 0;font-size:11px;color:var(--muted);text-align:center;line-height:1.55}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="lbox">
+    <svg class="logo" role="img" aria-label="KIZU CHIROPRACTIC" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 751.88796 91.5983">
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 54.289062 41.957031 C 72.675781 28.292969 88.109375 31.066406 94.066406 32.96875 C 87.847656 19.550781 72.589844 10.070312 54.761719 10.070312 C 31.40625 10.070312 12.46875 26.332031 12.46875 46.394531 C 12.46875 47.542969 12.527344 48.675781 12.652344 49.792969 C 19.933594 52.128906 36.59375 55.089844 54.289062 41.957031 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 60.050781 54.195312 C 39.460938 48.792969 23.964844 59.332031 18.007812 64.378906 C 25.28125 75.332031 39.015625 82.726562 54.761719 82.726562 C 77.246094 82.726562 95.636719 67.652344 96.964844 48.621094 C 90.3125 53.066406 77.574219 58.789062 60.050781 54.195312 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 154.394531 75.066406 L 141.128906 75.066406 L 127.824219 52.394531 L 125.242188 55.417969 L 125.242188 75.066406 L 114.261719 75.066406 L 114.261719 17.246094 L 125.242188 17.246094 L 125.242188 39.929688 L 145.285156 16.289062 L 151.984375 24.304688 L 135.386719 43.59375 Z M 154.394531 75.066406 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 158.707031 17.246094 L 169.644531 17.246094 L 169.644531 75.066406 L 158.707031 75.066406 Z M 158.707031 17.246094 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 211.855469 75.066406 L 175.945312 75.066406 L 175.945312 69.15625 L 197.304688 27.167969 L 177.902344 27.167969 L 177.902344 17.246094 L 211.523438 17.246094 L 211.523438 22.789062 L 190.027344 65.152344 L 211.855469 65.152344 Z M 211.855469 75.066406 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 251.246094 56.867188 C 251.246094 62.457031 249.785156 67.003906 246.847656 70.5625 C 243.917969 74.125 239.441406 75.929688 233.347656 75.929688 C 227.367188 75.929688 223.003906 74.203125 220.207031 70.773438 C 217.449219 67.324219 216.046875 62.746094 216.046875 56.867188 L 216.046875 17.25 L 227.007812 17.25 L 227.007812 57.285156 C 227.007812 59.992188 227.585938 62.101562 228.710938 63.660156 C 229.851562 65.171875 231.683594 65.976562 234.210938 65.976562 C 236.851562 65.976562 238.738281 65.109375 239.945312 63.386719 C 241.167969 61.703125 241.765625 58.972656 241.765625 55.195312 L 241.765625 17.25 L 251.246094 17.25 L 251.246094 56.867188 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 306.773438 20.871094 L 305.140625 36.257812 L 302.25 36.257812 L 302.25 30.445312 C 301.386719 29.652344 300.34375 28.929688 299.164062 28.289062 C 297.972656 27.640625 296.214844 27.316406 293.933594 27.316406 C 290.269531 27.316406 287.132812 29.007812 284.5 32.34375 C 281.914062 35.722656 280.617188 40.207031 280.617188 45.875 C 280.617188 51.699219 281.648438 56.382812 283.710938 59.78125 C 285.792969 63.28125 289.03125 65 293.445312 65 C 295.347656 65 297.484375 64.683594 299.886719 64.03125 C 302.25 63.421875 304.277344 62.640625 305.953125 61.609375 L 305.953125 72.15625 C 304.335938 73.339844 302.25 74.277344 299.695312 74.917969 C 297.1875 75.582031 294.917969 75.929688 292.855469 75.929688 C 285.21875 75.929688 279.378906 73.304688 275.285156 68.027344 C 271.1875 62.78125 269.132812 55.570312 269.132812 46.355469 C 269.132812 38.203125 271.242188 31.269531 275.511719 25.449219 C 279.816406 19.667969 285.742188 16.765625 293.414062 16.765625 C 295.496094 16.765625 297.816406 17.089844 300.304688 17.742188 C 302.820312 18.386719 305.027344 19.460938 306.773438 20.871094 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 348.527344 75.066406 L 337.605469 75.066406 L 337.605469 50.808594 L 324.222656 50.808594 L 324.222656 75.066406 L 313.28125 75.066406 L 313.28125 17.246094 L 324.222656 17.246094 L 324.222656 41.238281 L 337.605469 41.238281 L 337.605469 17.246094 L 348.527344 17.246094 Z M 348.527344 75.066406 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 358.230469 17.246094 L 369.160156 17.246094 L 369.160156 75.066406 L 358.230469 75.066406 Z M 358.230469 17.246094 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 399.371094 42.082031 C 398.21875 43.613281 396.597656 44.371094 394.609375 44.371094 L 389.773438 44.371094 L 389.773438 27.167969 L 394.285156 27.167969 C 396.457031 27.167969 398.167969 27.929688 399.34375 29.328125 C 400.539062 30.785156 401.125 32.933594 401.125 35.835938 C 401.125 38.433594 400.539062 40.542969 399.371094 42.082031 M 404.308594 47.757812 C 406.625 46.847656 408.535156 45.222656 409.925781 42.851562 C 411.335938 40.484375 412.074219 37.410156 412.074219 33.636719 C 412.074219 28.511719 410.554688 24.53125 407.644531 21.617188 C 404.683594 18.707031 400.539062 17.246094 395.203125 17.246094 L 378.863281 17.246094 L 378.863281 75.066406 L 389.773438 75.066406 L 389.773438 50.5625 L 394.125 50.5625 L 406.804688 75.066406 L 418.859375 75.066406 L 404.308594 47.757812 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 450.226562 60.621094 C 448.554688 63.714844 445.855469 65.21875 442.195312 65.21875 C 438.527344 65.21875 435.828125 63.644531 434.109375 60.425781 C 432.390625 57.242188 431.523438 52.554688 431.523438 46.394531 C 431.523438 39.730469 432.441406 34.933594 434.273438 31.917969 C 436.109375 28.84375 438.742188 27.386719 442.195312 27.429688 C 445.824219 27.445312 448.503906 29.0625 450.226562 32.179688 C 451.949219 35.308594 452.8125 40.0625 452.765625 46.394531 C 452.730469 52.769531 451.867188 57.519531 450.226562 60.621094 M 458.652344 24.207031 C 454.804688 19.253906 449.363281 16.765625 442.253906 16.765625 C 435.351562 16.765625 429.90625 19.410156 425.96875 24.644531 C 422.042969 29.917969 420.066406 37.140625 420.066406 46.355469 C 420.066406 55.570312 422.09375 62.78125 426.019531 68.027344 C 430.019531 73.304688 435.402344 75.929688 442.253906 75.929688 C 449.09375 75.929688 454.539062 73.195312 458.527344 67.761719 C 462.464844 62.34375 464.457031 55.195312 464.40625 46.355469 C 464.40625 36.554688 462.464844 29.164062 458.652344 24.207031 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 492.375 42.050781 C 491.207031 43.613281 489.375 44.371094 486.894531 44.371094 L 481.921875 44.371094 L 481.921875 27.167969 L 486.605469 27.167969 C 488.976562 27.167969 490.804688 27.875 492.109375 29.277344 C 493.453125 30.675781 494.097656 32.816406 494.097656 35.695312 C 494.097656 38.386719 493.503906 40.484375 492.375 42.050781 M 500.457031 21.386719 C 497.4375 18.601562 493.339844 17.246094 488.113281 17.246094 L 470.972656 17.246094 L 470.972656 75.066406 L 481.921875 75.066406 L 481.921875 50.808594 L 488.273438 50.808594 C 493.660156 50.808594 497.78125 49.429688 500.671875 46.683594 C 503.585938 43.882812 505.003906 39.671875 505.003906 34.015625 C 505.003906 28.355469 503.472656 24.15625 500.457031 21.386719 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 530.871094 42.082031 C 529.71875 43.613281 528.160156 44.371094 526.105469 44.371094 L 521.277344 44.371094 L 521.277344 27.167969 L 525.792969 27.167969 C 528 27.167969 529.664062 27.929688 530.851562 29.328125 C 532.046875 30.785156 532.632812 32.933594 532.632812 35.835938 C 532.632812 38.433594 532.046875 40.542969 530.871094 42.082031 M 535.8125 47.757812 C 538.1875 46.847656 540.03125 45.222656 541.472656 42.851562 C 542.871094 40.484375 543.574219 37.410156 543.574219 33.636719 C 543.574219 28.511719 542.078125 24.53125 539.15625 21.617188 C 536.191406 18.707031 532.054688 17.246094 526.707031 17.246094 L 510.371094 17.246094 L 510.371094 75.066406 L 521.277344 75.066406 L 521.277344 50.5625 L 525.621094 50.5625 L 538.308594 75.066406 L 550.378906 75.066406 L 535.8125 47.757812 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 563.636719 59.675781 L 570.214844 40.375 L 576.902344 59.675781 L 563.636719 59.675781 M 572.78125 16.765625 L 569.386719 16.765625 L 548.214844 75.066406 L 558.933594 75.066406 L 562 65.367188 L 578.984375 65.367188 L 582.382812 75.066406 L 594.171875 75.066406 Z M 572.78125 16.765625 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 632.929688 20.871094 L 631.265625 36.257812 L 628.402344 36.257812 L 628.402344 30.445312 C 627.535156 29.652344 626.484375 28.929688 625.292969 28.289062 C 624.113281 27.640625 622.363281 27.316406 620.042969 27.316406 C 616.382812 27.316406 613.261719 29.007812 610.640625 32.34375 C 608.039062 35.722656 606.738281 40.207031 606.738281 45.875 C 606.738281 51.699219 607.761719 56.382812 609.867188 59.78125 C 611.933594 63.28125 615.199219 65 619.585938 65 C 621.503906 65 623.605469 64.683594 626.035156 64.03125 C 628.402344 63.421875 630.449219 62.640625 632.121094 61.609375 L 632.121094 72.15625 C 630.464844 73.339844 628.402344 74.277344 625.871094 74.917969 C 623.339844 75.582031 621.019531 75.929688 619.03125 75.929688 C 611.371094 75.929688 605.492188 73.304688 601.402344 68.027344 C 597.355469 62.78125 595.253906 55.570312 595.253906 46.355469 C 595.253906 38.203125 597.410156 31.269531 601.667969 25.449219 C 605.929688 19.667969 611.855469 16.765625 619.566406 16.765625 C 621.644531 16.765625 623.929688 17.089844 626.460938 17.742188 C 628.996094 18.386719 631.117188 19.460938 632.929688 20.871094 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 669.632812 27.167969 L 657.957031 27.167969 L 657.957031 75.066406 L 647.054688 75.066406 L 647.054688 27.167969 L 635.523438 27.167969 L 635.523438 17.25 L 669.632812 17.25 Z M 669.632812 27.167969 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 675.242188 17.246094 L 686.179688 17.246094 L 686.179688 75.066406 L 675.242188 75.066406 Z M 675.242188 17.246094 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 731.5625 20.871094 L 729.9375 36.257812 L 727.035156 36.257812 L 727.035156 30.445312 C 726.167969 29.652344 725.144531 28.929688 723.921875 28.289062 C 722.78125 27.640625 720.992188 27.316406 718.671875 27.316406 C 715.019531 27.316406 711.886719 29.007812 709.265625 32.34375 C 706.660156 35.722656 705.367188 40.207031 705.367188 45.875 C 705.367188 51.699219 706.386719 56.382812 708.492188 59.78125 C 710.5625 63.28125 713.824219 65 718.246094 65 C 720.132812 65 722.292969 64.683594 724.664062 64.03125 C 727.035156 63.421875 729.078125 62.640625 730.75 61.609375 L 730.75 72.15625 C 729.132812 73.339844 727.035156 74.277344 724.5 74.917969 C 721.960938 75.582031 719.703125 75.929688 717.65625 75.929688 C 710.003906 75.929688 704.125 73.304688 700.023438 68.027344 C 695.980469 62.78125 693.949219 55.570312 693.949219 46.355469 C 693.949219 38.203125 696.042969 31.269531 700.296875 25.449219 C 704.554688 19.667969 710.535156 16.765625 718.199219 16.765625 C 720.265625 16.765625 722.5625 17.089844 725.09375 17.742188 C 727.589844 18.386719 729.777344 19.460938 731.5625 20.871094 "/>
+</svg>
+    <h1>KIZUカイロAI</h1>
+    <p class="sub">当院に通われている患者さま向けの、<br>ご相談アシスタントです。</p>
+
+    <div id="emailStep">
+      <div class="field">
+        <label for="emailInput">メールアドレス</label>
+        <input id="emailInput" type="email" inputmode="email" autocomplete="email"
+               autocapitalize="off" autocorrect="off" placeholder="example@gmail.com">
+      </div>
+      <div class="field">
+        <label for="codeWordInput">合言葉（初回のみ）</label>
+        <input id="codeWordInput" type="text" autocapitalize="off" autocorrect="off"
+               autocomplete="off" placeholder="院内の掲示をご覧ください">
+        <div class="hint">2回目からは入力不要です。空欄のままご送信ください。</div>
+      </div>
+      <button id="sendCodeBtn" onclick="requestCode(false)">認証コードを送る</button>
+      <div class="err" id="loginError"></div>
+    </div>
+
+    <div id="codeStep">
+      <p class="sub" id="sentTo"></p>
+      <div class="field">
+        <label for="codeInput">6桁の認証コード</label>
+        <input id="codeInput" class="codeinput" type="text" inputmode="numeric"
+               autocomplete="one-time-code" maxlength="6" placeholder="000000">
+        <div class="hint">メールが届かないときは、迷惑メールフォルダもご確認ください。</div>
+      </div>
+      <button id="verifyBtn" onclick="verifyCode()">ログイン</button>
+      <button class="linkbtn" id="resendBtn" onclick="requestCode(true)">コードを再送する</button>
+      <button class="linkbtn" onclick="backToEmail()">メールアドレスを入力し直す</button>
+      <div class="err" id="codeError"></div>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <svg class="logo" role="img" aria-label="KIZU CHIROPRACTIC" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 751.88796 91.5983">
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 54.289062 41.957031 C 72.675781 28.292969 88.109375 31.066406 94.066406 32.96875 C 87.847656 19.550781 72.589844 10.070312 54.761719 10.070312 C 31.40625 10.070312 12.46875 26.332031 12.46875 46.394531 C 12.46875 47.542969 12.527344 48.675781 12.652344 49.792969 C 19.933594 52.128906 36.59375 55.089844 54.289062 41.957031 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 60.050781 54.195312 C 39.460938 48.792969 23.964844 59.332031 18.007812 64.378906 C 25.28125 75.332031 39.015625 82.726562 54.761719 82.726562 C 77.246094 82.726562 95.636719 67.652344 96.964844 48.621094 C 90.3125 53.066406 77.574219 58.789062 60.050781 54.195312 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 154.394531 75.066406 L 141.128906 75.066406 L 127.824219 52.394531 L 125.242188 55.417969 L 125.242188 75.066406 L 114.261719 75.066406 L 114.261719 17.246094 L 125.242188 17.246094 L 125.242188 39.929688 L 145.285156 16.289062 L 151.984375 24.304688 L 135.386719 43.59375 Z M 154.394531 75.066406 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 158.707031 17.246094 L 169.644531 17.246094 L 169.644531 75.066406 L 158.707031 75.066406 Z M 158.707031 17.246094 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 211.855469 75.066406 L 175.945312 75.066406 L 175.945312 69.15625 L 197.304688 27.167969 L 177.902344 27.167969 L 177.902344 17.246094 L 211.523438 17.246094 L 211.523438 22.789062 L 190.027344 65.152344 L 211.855469 65.152344 Z M 211.855469 75.066406 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 251.246094 56.867188 C 251.246094 62.457031 249.785156 67.003906 246.847656 70.5625 C 243.917969 74.125 239.441406 75.929688 233.347656 75.929688 C 227.367188 75.929688 223.003906 74.203125 220.207031 70.773438 C 217.449219 67.324219 216.046875 62.746094 216.046875 56.867188 L 216.046875 17.25 L 227.007812 17.25 L 227.007812 57.285156 C 227.007812 59.992188 227.585938 62.101562 228.710938 63.660156 C 229.851562 65.171875 231.683594 65.976562 234.210938 65.976562 C 236.851562 65.976562 238.738281 65.109375 239.945312 63.386719 C 241.167969 61.703125 241.765625 58.972656 241.765625 55.195312 L 241.765625 17.25 L 251.246094 17.25 L 251.246094 56.867188 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 306.773438 20.871094 L 305.140625 36.257812 L 302.25 36.257812 L 302.25 30.445312 C 301.386719 29.652344 300.34375 28.929688 299.164062 28.289062 C 297.972656 27.640625 296.214844 27.316406 293.933594 27.316406 C 290.269531 27.316406 287.132812 29.007812 284.5 32.34375 C 281.914062 35.722656 280.617188 40.207031 280.617188 45.875 C 280.617188 51.699219 281.648438 56.382812 283.710938 59.78125 C 285.792969 63.28125 289.03125 65 293.445312 65 C 295.347656 65 297.484375 64.683594 299.886719 64.03125 C 302.25 63.421875 304.277344 62.640625 305.953125 61.609375 L 305.953125 72.15625 C 304.335938 73.339844 302.25 74.277344 299.695312 74.917969 C 297.1875 75.582031 294.917969 75.929688 292.855469 75.929688 C 285.21875 75.929688 279.378906 73.304688 275.285156 68.027344 C 271.1875 62.78125 269.132812 55.570312 269.132812 46.355469 C 269.132812 38.203125 271.242188 31.269531 275.511719 25.449219 C 279.816406 19.667969 285.742188 16.765625 293.414062 16.765625 C 295.496094 16.765625 297.816406 17.089844 300.304688 17.742188 C 302.820312 18.386719 305.027344 19.460938 306.773438 20.871094 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 348.527344 75.066406 L 337.605469 75.066406 L 337.605469 50.808594 L 324.222656 50.808594 L 324.222656 75.066406 L 313.28125 75.066406 L 313.28125 17.246094 L 324.222656 17.246094 L 324.222656 41.238281 L 337.605469 41.238281 L 337.605469 17.246094 L 348.527344 17.246094 Z M 348.527344 75.066406 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 358.230469 17.246094 L 369.160156 17.246094 L 369.160156 75.066406 L 358.230469 75.066406 Z M 358.230469 17.246094 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 399.371094 42.082031 C 398.21875 43.613281 396.597656 44.371094 394.609375 44.371094 L 389.773438 44.371094 L 389.773438 27.167969 L 394.285156 27.167969 C 396.457031 27.167969 398.167969 27.929688 399.34375 29.328125 C 400.539062 30.785156 401.125 32.933594 401.125 35.835938 C 401.125 38.433594 400.539062 40.542969 399.371094 42.082031 M 404.308594 47.757812 C 406.625 46.847656 408.535156 45.222656 409.925781 42.851562 C 411.335938 40.484375 412.074219 37.410156 412.074219 33.636719 C 412.074219 28.511719 410.554688 24.53125 407.644531 21.617188 C 404.683594 18.707031 400.539062 17.246094 395.203125 17.246094 L 378.863281 17.246094 L 378.863281 75.066406 L 389.773438 75.066406 L 389.773438 50.5625 L 394.125 50.5625 L 406.804688 75.066406 L 418.859375 75.066406 L 404.308594 47.757812 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 450.226562 60.621094 C 448.554688 63.714844 445.855469 65.21875 442.195312 65.21875 C 438.527344 65.21875 435.828125 63.644531 434.109375 60.425781 C 432.390625 57.242188 431.523438 52.554688 431.523438 46.394531 C 431.523438 39.730469 432.441406 34.933594 434.273438 31.917969 C 436.109375 28.84375 438.742188 27.386719 442.195312 27.429688 C 445.824219 27.445312 448.503906 29.0625 450.226562 32.179688 C 451.949219 35.308594 452.8125 40.0625 452.765625 46.394531 C 452.730469 52.769531 451.867188 57.519531 450.226562 60.621094 M 458.652344 24.207031 C 454.804688 19.253906 449.363281 16.765625 442.253906 16.765625 C 435.351562 16.765625 429.90625 19.410156 425.96875 24.644531 C 422.042969 29.917969 420.066406 37.140625 420.066406 46.355469 C 420.066406 55.570312 422.09375 62.78125 426.019531 68.027344 C 430.019531 73.304688 435.402344 75.929688 442.253906 75.929688 C 449.09375 75.929688 454.539062 73.195312 458.527344 67.761719 C 462.464844 62.34375 464.457031 55.195312 464.40625 46.355469 C 464.40625 36.554688 462.464844 29.164062 458.652344 24.207031 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 492.375 42.050781 C 491.207031 43.613281 489.375 44.371094 486.894531 44.371094 L 481.921875 44.371094 L 481.921875 27.167969 L 486.605469 27.167969 C 488.976562 27.167969 490.804688 27.875 492.109375 29.277344 C 493.453125 30.675781 494.097656 32.816406 494.097656 35.695312 C 494.097656 38.386719 493.503906 40.484375 492.375 42.050781 M 500.457031 21.386719 C 497.4375 18.601562 493.339844 17.246094 488.113281 17.246094 L 470.972656 17.246094 L 470.972656 75.066406 L 481.921875 75.066406 L 481.921875 50.808594 L 488.273438 50.808594 C 493.660156 50.808594 497.78125 49.429688 500.671875 46.683594 C 503.585938 43.882812 505.003906 39.671875 505.003906 34.015625 C 505.003906 28.355469 503.472656 24.15625 500.457031 21.386719 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 530.871094 42.082031 C 529.71875 43.613281 528.160156 44.371094 526.105469 44.371094 L 521.277344 44.371094 L 521.277344 27.167969 L 525.792969 27.167969 C 528 27.167969 529.664062 27.929688 530.851562 29.328125 C 532.046875 30.785156 532.632812 32.933594 532.632812 35.835938 C 532.632812 38.433594 532.046875 40.542969 530.871094 42.082031 M 535.8125 47.757812 C 538.1875 46.847656 540.03125 45.222656 541.472656 42.851562 C 542.871094 40.484375 543.574219 37.410156 543.574219 33.636719 C 543.574219 28.511719 542.078125 24.53125 539.15625 21.617188 C 536.191406 18.707031 532.054688 17.246094 526.707031 17.246094 L 510.371094 17.246094 L 510.371094 75.066406 L 521.277344 75.066406 L 521.277344 50.5625 L 525.621094 50.5625 L 538.308594 75.066406 L 550.378906 75.066406 L 535.8125 47.757812 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 563.636719 59.675781 L 570.214844 40.375 L 576.902344 59.675781 L 563.636719 59.675781 M 572.78125 16.765625 L 569.386719 16.765625 L 548.214844 75.066406 L 558.933594 75.066406 L 562 65.367188 L 578.984375 65.367188 L 582.382812 75.066406 L 594.171875 75.066406 Z M 572.78125 16.765625 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 632.929688 20.871094 L 631.265625 36.257812 L 628.402344 36.257812 L 628.402344 30.445312 C 627.535156 29.652344 626.484375 28.929688 625.292969 28.289062 C 624.113281 27.640625 622.363281 27.316406 620.042969 27.316406 C 616.382812 27.316406 613.261719 29.007812 610.640625 32.34375 C 608.039062 35.722656 606.738281 40.207031 606.738281 45.875 C 606.738281 51.699219 607.761719 56.382812 609.867188 59.78125 C 611.933594 63.28125 615.199219 65 619.585938 65 C 621.503906 65 623.605469 64.683594 626.035156 64.03125 C 628.402344 63.421875 630.449219 62.640625 632.121094 61.609375 L 632.121094 72.15625 C 630.464844 73.339844 628.402344 74.277344 625.871094 74.917969 C 623.339844 75.582031 621.019531 75.929688 619.03125 75.929688 C 611.371094 75.929688 605.492188 73.304688 601.402344 68.027344 C 597.355469 62.78125 595.253906 55.570312 595.253906 46.355469 C 595.253906 38.203125 597.410156 31.269531 601.667969 25.449219 C 605.929688 19.667969 611.855469 16.765625 619.566406 16.765625 C 621.644531 16.765625 623.929688 17.089844 626.460938 17.742188 C 628.996094 18.386719 631.117188 19.460938 632.929688 20.871094 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 669.632812 27.167969 L 657.957031 27.167969 L 657.957031 75.066406 L 647.054688 75.066406 L 647.054688 27.167969 L 635.523438 27.167969 L 635.523438 17.25 L 669.632812 17.25 Z M 669.632812 27.167969 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 675.242188 17.246094 L 686.179688 17.246094 L 686.179688 75.066406 L 675.242188 75.066406 Z M 675.242188 17.246094 "/>
+<path fill-rule="nonzero" fill="rgb(41.960144%, 73.33374%, 43.136597%)" fill-opacity="1" d="M 731.5625 20.871094 L 729.9375 36.257812 L 727.035156 36.257812 L 727.035156 30.445312 C 726.167969 29.652344 725.144531 28.929688 723.921875 28.289062 C 722.78125 27.640625 720.992188 27.316406 718.671875 27.316406 C 715.019531 27.316406 711.886719 29.007812 709.265625 32.34375 C 706.660156 35.722656 705.367188 40.207031 705.367188 45.875 C 705.367188 51.699219 706.386719 56.382812 708.492188 59.78125 C 710.5625 63.28125 713.824219 65 718.246094 65 C 720.132812 65 722.292969 64.683594 724.664062 64.03125 C 727.035156 63.421875 729.078125 62.640625 730.75 61.609375 L 730.75 72.15625 C 729.132812 73.339844 727.035156 74.277344 724.5 74.917969 C 721.960938 75.582031 719.703125 75.929688 717.65625 75.929688 C 710.003906 75.929688 704.125 73.304688 700.023438 68.027344 C 695.980469 62.78125 693.949219 55.570312 693.949219 46.355469 C 693.949219 38.203125 696.042969 31.269531 700.296875 25.449219 C 704.554688 19.667969 710.535156 16.765625 718.199219 16.765625 C 720.265625 16.765625 722.5625 17.089844 725.09375 17.742188 C 727.589844 18.386719 729.777344 19.460938 731.5625 20.871094 "/>
+</svg>
+    <button class="logout" onclick="logout()">ログアウト</button>
+  </header>
+  <div id="msgs"><div class="wrap" id="wrap">
+    <div class="intro">
+      <h2>ご相談をどうぞ</h2>
+      当院の施術やセルフケア、料金・アクセスなどについてお答えします。
+      施術後のお体の変化や、検査結果で気になることもご相談ください。
+      <div class="warn">
+        <b>次の症状がある方は、この画面ではなく、ただちに医療機関を受診してください。</b><br>
+        おしっこや便が出ない・漏れる／足に力が入らない／お尻や股のあたりのしびれ／
+        発熱を伴う強い痛み
+      </div>
+      <div class="chips">
+        <button class="chip" onclick="askChip(this)">初診の料金はいくらですか</button>
+        <button class="chip" onclick="askChip(this)">施術のあと体がだるいのですが</button>
+        <button class="chip" onclick="askChip(this)">保険は使えますか</button>
+        <button class="chip" onclick="askChip(this)">場所と受付時間を教えてください</button>
+      </div>
+    </div>
+  </div></div>
+  <footer>
+    <div class="inrow">
+      <textarea id="input" rows="1" placeholder="ご相談をご入力ください"></textarea>
+      <button id="send" onclick="send()" aria-label="送信">↑</button>
+    </div>
+    <div class="disc">医師による診断ではありません。診断・治療方針は主治医の先生にご相談ください。</div>
+  </footer>
+</div>
+
+<script>
+const WORKER = 'https://kizu-ai.kizuchiro7.workers.dev';
+const TOKEN_KEY = 'kizu_chiro_token';
+
+function getToken(){ try{ return localStorage.getItem(TOKEN_KEY); }catch(e){ return null; } }
+function setToken(t){ try{ localStorage.setItem(TOKEN_KEY, t); }catch(e){} }
+function clearToken(){ try{ localStorage.removeItem(TOKEN_KEY); }catch(e){} }
+function authHeaders(){
+  return { 'Content-Type':'application/json', 'Authorization':'Bearer ' + (getToken() || '') };
+}
+
+/* ---------------- ログイン ---------------- */
+let pendingEmail = '';
+let resendTimer = null;
+
+const $ = id => document.getElementById(id);
+function showLoginError(m){ $('loginError').textContent = m || ''; }
+function showCodeError(m){ $('codeError').textContent = m || ''; }
+
+async function requestCode(isResend){
+  const email = (isResend ? pendingEmail : $('emailInput').value).trim();
+  const signupCode = $('codeWordInput').value.trim();
+  if(!email){ showLoginError('メールアドレスをご入力ください'); return; }
+  showLoginError(''); showCodeError('');
+  const btn = isResend ? $('resendBtn') : $('sendCodeBtn');
+  btn.disabled = true;
+  const label = btn.textContent; btn.textContent = '送信中…';
+  try{
+    const r = await fetch(WORKER + '/auth/request-code', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, signupCode })
+    });
+    const d = await r.json().catch(()=>({}));
+    if(r.status === 429){
+      (isResend?showCodeError:showLoginError)('送信の間隔が短すぎます。しばらくしてからお試しください。');
+    } else if(d && d.error === 'signup_closed'){
+      showLoginError('ただいま新規のご登録を受け付けておりません。恐れ入りますが受付までお声がけください。');
+    } else if(!r.ok){
+      (isResend?showCodeError:showLoginError)('送信できませんでした。時間をおいてお試しください。');
+    } else {
+      pendingEmail = email;
+      $('emailStep').style.display = 'none';
+      $('codeStep').style.display = 'block';
+      $('sentTo').innerHTML = '<b>' + email + '</b> 宛に<br>6桁の認証コードをお送りしました。';
+      $('codeInput').focus();
+      startResendCooldown();
+    }
+  }catch(e){
+    (isResend?showCodeError:showLoginError)('通信できませんでした。電波の良い場所でお試しください。');
+  }finally{ btn.disabled = false; btn.textContent = label; }
+}
+
+function startResendCooldown(){
+  let s = 60; const b = $('resendBtn');
+  clearInterval(resendTimer);
+  b.disabled = true;
+  const tick = () => {
+    b.textContent = s > 0 ? `コードを再送する（${s}秒後）` : 'コードを再送する';
+    if(s <= 0){ b.disabled = false; clearInterval(resendTimer); }
+    s--;
+  };
+  tick(); resendTimer = setInterval(tick, 1000);
+}
+
+function backToEmail(){
+  clearInterval(resendTimer);
+  $('codeStep').style.display = 'none';
+  $('emailStep').style.display = 'block';
+  $('codeInput').value = ''; showCodeError('');
+}
+
+async function verifyCode(){
+  const code = $('codeInput').value.trim();
+  if(!/^[0-9]{6}$/.test(code)){ showCodeError('6桁の数字をご入力ください'); return; }
+  showCodeError('');
+  const btn = $('verifyBtn'); btn.disabled = true; btn.textContent = '確認中…';
+  try{
+    const r = await fetch(WORKER + '/auth/verify-code', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email: pendingEmail, code })
+    });
+    const d = await r.json().catch(()=>({}));
+    if(r.ok && d.token){ setToken(d.token); enterApp(); }
+    else if(d && typeof d.attemptsLeft === 'number' && d.attemptsLeft > 0){
+      showCodeError(`コードが違います（あと${d.attemptsLeft}回）`);
+    } else {
+      showCodeError('コードが違うか、有効期限が切れています。お手数ですが、もう一度お送りください。');
+    }
+  }catch(e){ showCodeError('通信できませんでした。時間をおいてお試しください。'); }
+  finally{ btn.disabled = false; btn.textContent = 'ログイン'; }
+}
+
+function enterApp(){
+  $('login').style.display = 'none';
+  $('app').style.display = 'flex';
+  $('input').focus();
+}
+function logout(){
+  clearToken(); messages = [];
+  location.reload();
+}
+function handleAuthFailure(){
+  clearToken();
+  $('app').style.display = 'none';
+  $('login').style.display = 'flex';
+  backToEmail();
+  showLoginError('ログインの有効期限が切れました。もう一度メールアドレスをご入力ください。');
+}
+
+/* ---------------- チャット ---------------- */
+let messages = [];
+let busy = false;
+
+function esc(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* 電話番号は、そのままタップで発信できるようにする（受診を勧める場面で効く） */
+function formatText(t){
+  let h = esc(t);
+  h = h.replace(/\|(.+)\|\n\|[-:| ]+\|\n((?:\|.*\|\n?)*)/g, (m, head, rows) => {
+    const th = head.split('|').map(s=>s.trim()).filter(Boolean).map(s=>`<th>${s}</th>`).join('');
+    const tr = rows.trim().split('\n').map(r =>
+      '<tr>' + r.split('|').map(s=>s.trim()).filter(Boolean).map(s=>`<td>${s}</td>`).join('') + '</tr>'
+    ).join('');
+    return `<table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
+  });
+  h = h.replace(/^#{1,4}\s*(.+)$/gm, '<b>$1</b>');
+  h = h.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  h = h.replace(/^[-・]\s+(.+)$/gm, '<li>$1</li>');
+  h = h.replace(/(<li>[\s\S]*?<\/li>)(?!\s*<li>)/g, '<ul>$1</ul>');
+  h = h.replace(/0?3-?3272-?1939/g, '<a class="tel" href="tel:0332721939">03-3272-1939</a>');
+  h = h.replace(/#7119/g, '<a class="tel" href="tel:7119">#7119</a>');
+  h = h.replace(/(?<![0-9])119(?![0-9])/g, '<a class="tel" href="tel:119">119</a>');
+  // 箇条書き・表の周りの改行は <br> にしない（リスト内に余分な空行が入るため）
+  h = h.replace(/\n*(<\/?(?:ul|li|table|thead|tbody|tr|th|td)[^>]*>)\n*/g, '$1');
+  return h.replace(/\n/g, '<br>');
+}
+
+function addMsg(role, text){
+  const d = document.createElement('div');
+  d.className = 'msg ' + (role === 'user' ? 'u' : 'a');
+  d.innerHTML = '<div class="bub">' + (role === 'user' ? esc(text).replace(/\n/g,'<br>') : formatText(text)) + '</div>';
+  $('wrap').appendChild(d);
+  $('msgs').scrollTop = $('msgs').scrollHeight;
+  return d;
+}
+function addTyping(){
+  const d = document.createElement('div');
+  d.className = 'msg a'; d.id = 'typing';
+  d.innerHTML = '<div class="bub"><div class="dots"><i></i><i></i><i></i></div></div>';
+  $('wrap').appendChild(d); $('msgs').scrollTop = $('msgs').scrollHeight;
+}
+function removeTyping(){ const t = $('typing'); if(t) t.remove(); }
+
+function askChip(btn){ $('input').value = btn.textContent; send(); }
+
+async function send(){
+  const t = $('input').value.trim();
+  if(!t || busy) return;
+  busy = true; $('send').disabled = true;
+  $('input').value = ''; $('input').style.height = 'auto';
+  addMsg('user', t);
+  messages.push({ role:'user', content:t });
+  addTyping();
+  try{
+    const r = await fetch(WORKER + '/chiro', {
+      method:'POST', headers: authHeaders(),
+      body: JSON.stringify({ messages })
+    });
+    removeTyping();
+    if(r.status === 401 || r.status === 403){ handleAuthFailure(); return; }
+    const d = await r.json().catch(()=>null);
+    const txt = d && d.content && d.content[0] ? d.content[0].text : null;
+    if(txt){ addMsg('assistant', txt); messages.push({ role:'assistant', content:txt }); }
+    else { addMsg('assistant', '申し訳ございません。うまくお答えできませんでした。もう一度お試しいただけますか。'); }
+  }catch(e){
+    removeTyping();
+    addMsg('assistant', '通信できませんでした。電波の良い場所で、もう一度お試しください。');
+  }finally{ busy = false; $('send').disabled = false; $('input').focus(); }
+}
+
+/* 入力欄の高さ自動調整 */
+const input = $('input');
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 132) + 'px';
+});
+
+/* Enter で送信。日本語変換の確定 Enter で誤送信しないようにする。
+   compositionend が keydown の直前に発火するブラウザがあるため、
+   確定直後の1tickも無視する（受講生アプリで実績のある対策）。 */
+let isComposingInput = false;
+let justFinishedComposing = false;
+input.addEventListener('compositionstart', () => { isComposingInput = true; });
+input.addEventListener('compositionend', () => {
+  isComposingInput = false;
+  justFinishedComposing = true;
+  setTimeout(() => { justFinishedComposing = false; }, 0);
+});
+input.addEventListener('keydown', e => {
+  if(e.key !== 'Enter' || e.shiftKey) return;
+  if(e.isComposing || isComposingInput || e.keyCode === 229 || justFinishedComposing) return;
+  e.preventDefault(); send();
+});
+$('emailInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter' && !e.isComposing && e.keyCode !== 229){ e.preventDefault(); requestCode(false); }
+});
+$('codeWordInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter' && !e.isComposing && e.keyCode !== 229){ e.preventDefault(); requestCode(false); }
+});
+$('codeInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); verifyCode(); }
+});
+$('codeInput').addEventListener('input', e => {
+  e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0,6);
+});
+
+if(getToken()) enterApp();
+</script>
+</body>
+</html>
