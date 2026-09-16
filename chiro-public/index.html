@@ -70,10 +70,18 @@ button{border:0;border-radius:13px;background:var(--green);color:#fff;
 button:hover:not(:disabled){background:var(--green-d)}
 button:disabled{opacity:.5;cursor:default}
 #send{width:48px;height:46px;flex-shrink:0;font-size:19px;padding:0}
+/* ウィジェットに埋め込まれたときは、ページ側のヘッダーを出さない。
+   パネル側に同じ見出しがあり、縦幅も惜しいため。 */
+html.embed header{display:none}
+html.embed #msgs{padding-top:14px}
 .disc{max-width:720px;margin:8px auto 0;font-size:11px;color:var(--muted);text-align:center;line-height:1.55}
 </style>
 </head>
 <body>
+<script>
+  // ウィジェット経由（?embed=1）かどうかを、描画前に決める。
+  if (location.search.indexOf('embed=1') !== -1) document.documentElement.className = 'embed';
+</script>
 <div id="app">
 <header>
 <svg class="logo" role="img" aria-label="KIZU CHIROPRACTIC" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 751.88796 91.5983">
