@@ -65,7 +65,7 @@
   var root = document.createElement("div");
   root.id = ID;
   root.innerHTML =
-    '<button class="kai-btn" type="button" aria-label="チャットで質問する">' +
+    '<button class="kai-btn" type="button">' +
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
     '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-5A8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/></svg>' +
     "ご質問はこちら</button>" +
