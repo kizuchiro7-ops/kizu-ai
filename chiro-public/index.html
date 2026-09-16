@@ -38,6 +38,9 @@ header .logo{height:22px}
 .bub table{border-collapse:collapse;margin:9px 0;font-size:14px;width:100%}
 .bub th,.bub td{border:1px solid var(--line);padding:6px 9px;text-align:left}
 .bub th{background:#f2f4ef;font-weight:700}
+.booklink{display:inline-block;background:var(--green);color:#fff;padding:9px 16px;
+  border-radius:10px;font-weight:700;text-decoration:none;margin:4px 0;font-size:14.5px}
+.booklink:hover{background:var(--green-d)}
 .tel{display:inline-block;background:#fff2f1;border:1px solid #f0c8c4;color:#b02c2c;
   padding:2px 8px;border-radius:7px;font-weight:700;text-decoration:none}
 .intro{background:var(--card);border:1px solid var(--line);border-radius:16px;
@@ -116,6 +119,7 @@ button:disabled{opacity:.5;cursor:default}
         <button class="chip">初回はどんな流れですか？</button>
         <button class="chip">場所と行き方を教えてください</button>
         <button class="chip">予約はどうすればいいですか？</button>
+        <button class="chip">初めてですが、今すぐ予約できますか？</button>
         <button class="chip">保険は使えますか？</button>
       </div>
     </div>
@@ -149,7 +153,15 @@ function esc(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'
 
 /* 電話番号は、そのままタップで発信できるようにする（受診を勧める場面で効く） */
 function formatText(t){
-  let h = esc(t);
+  // URL は先に取り出して目印に置き換える。電話番号の自動リンク（119 など）が
+  // URL の中の数字にヒットして、リンクを壊してしまうため。最後に戻す。
+  const links = [];
+  const stash = (label, url) => `\u0000L${links.push({ label, url }) - 1}\u0000`;
+  let src = t
+    .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, (m, label, url) => stash(label, url))
+    .replace(/(?<!\u0000)(https?:\/\/[^\s<>"'）)]+)/g, (m, url) => stash('リンクを開く', url));
+
+  let h = esc(src);
   h = h.replace(/\|(.+)\|\n\|[-:| ]+\|\n((?:\|.*\|\n?)*)/g, (m, head, rows) => {
     const th = head.split('|').map(s=>s.trim()).filter(Boolean).map(s=>`<th>${s}</th>`).join('');
     const tr = rows.trim().split('\n').map(r =>
@@ -163,9 +175,16 @@ function formatText(t){
   h = h.replace(/(<li>[\s\S]*?<\/li>)(?!\s*<li>)/g, '<ul>$1</ul>');
   h = h.replace(/0?3-?3272-?1939/g, '<a class="tel" href="tel:0332721939">03-3272-1939</a>');
   h = h.replace(/#7119/g, '<a class="tel" href="tel:7119">#7119</a>');
-  h = h.replace(/(?<![0-9])119(?![0-9])/g, '<a class="tel" href="tel:119">119</a>');
+  h = h.replace(/(?<![0-9\u0000])119(?![0-9\u0000])/g, '<a class="tel" href="tel:119">119</a>');
   h = h.replace(/\n*(<\/?(?:ul|li|table|thead|tbody|tr|th|td)[^>]*>)\n*/g, '$1');
-  return h.replace(/\n/g, '<br>');
+  h = h.replace(/\n/g, '<br>');
+
+  // 退避したリンクを戻す。href も表示文字も esc を通す（http/https のみ受け付ける）。
+  return h.replace(/\u0000L(\d+)\u0000/g, (m, i) => {
+    const l = links[Number(i)];
+    if (!l || !/^https?:\/\//.test(l.url)) return '';
+    return `<a class="booklink" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.label)}</a>`;
+  });
 }
 
 function bubble(role, text){
